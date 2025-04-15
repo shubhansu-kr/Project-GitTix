@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: tickets
-          image: shubhansukr/tickets
+          image: 600790316142.dkr.ecr.us-east-1.amazonaws.com/tickets
           env:
             - name: NATS_CLIENT_ID
               valueFrom:

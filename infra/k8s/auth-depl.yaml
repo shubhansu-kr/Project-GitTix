@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: auth
-          image: shubhansukr/auth
+          image: 600790316142.dkr.ecr.us-east-1.amazonaws.com/auth
           env:
             - name: MONGO_URI
               value: 'mongodb://auth-mongo-srv:27017/auth'

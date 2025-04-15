@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: expiration
-          image: shubhansukr/expiration
+          image: 600790316142.dkr.ecr.us-east-1.amazonaws.com/expiration
           env:
             - name: NATS_CLIENT_ID
               valueFrom:

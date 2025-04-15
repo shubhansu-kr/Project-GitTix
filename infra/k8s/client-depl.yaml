@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: client
-          image: shubhansukr/ticketing-client
+          image: 600790316142.dkr.ecr.us-east-1.amazonaws.com/client
 ---
 apiVersion: v1
 kind: Service
