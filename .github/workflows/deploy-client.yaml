@@ -1,0 +1,63 @@
+# name: deploy-client
+
+# on:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - 'client/**'
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+#       - run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+#         env:
+#           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+#           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+#       - run: cd client && docker build -t rallycoding/ticketing-client .
+#       - run: docker push rallycoding/ticketing-client
+#       - uses: digitalocean/action-doctl@v2
+#         with:
+#           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+#       - run: doctl kubernetes cluster kubeconfig save ticketing
+#       - run: kubectl rollout restart deployment client-depl
+
+name: Deploy Client
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'client/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and push Docker image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t ${{ secrets.ECR_REPO }}/client:$IMAGE_TAG ./client
+          docker push ${{ secrets.ECR_REPO }}/client:$IMAGE_TAG
+
+      - name: Update K8s deployment
+        run: |
+          aws eks update-kubeconfig --name ticketing-cluster --region ${{ secrets.AWS_REGION }}
+          kubectl set image deployment/client-depl client=${{ secrets.ECR_REPO }}/client:${{ github.sha }}
